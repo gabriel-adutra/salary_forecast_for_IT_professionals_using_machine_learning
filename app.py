@@ -1,19 +1,17 @@
 import warnings
 from flask import Flask, render_template, request
-from utils import carregar_modelos, fazer_previsao_salario
+from utils import load_models, predict_salary
 
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
+scaler, model = load_models()
+
 app = Flask(__name__)
-
-
-scaler, modelo = carregar_modelos()
-
 
 #######
 @app.route('/')
 def home():
-    """Rota principal - exibe o formulário"""
+    """Main route - displays the form"""
     return render_template('home.html')
     
 
@@ -29,18 +27,15 @@ def predict_salary():
             'experience': float(request.form['experience']),
         }
     except KeyError as e:
-        return render_template("home.html", prediction_text=f"Entrada inválida. Erro: {e}")
+        return render_template("home.html", prediction_text=f"Invalid input. Error: {e}")
     except ValueError:
-        return render_template("home.html", prediction_text="Valor de experiência deve ser um número válido.")
+        return render_template("home.html", prediction_text="Experience value must be a valid number.")
     
-    if any(value == '' for value in data.values()): # Valida se todos os campos estão preenchidos
-        return render_template("home.html", prediction_text="Verifique se todos os campos estão preenchidos.")
+    if any(value == '' for value in data.values()): # Validates if all fields are filled
+        return render_template("home.html", prediction_text="Please check if all fields are filled.")
     
-    resultado_formatado = fazer_previsao_salario(data, scaler, modelo) # Faz a previsão e retorna o resultado formatado
-    return render_template("home.html", prediction_text=resultado_formatado)
-
-
-
+    formatted_result = predict_salary(data, scaler, model) # Makes prediction and returns formatted result
+    return render_template("home.html", prediction_text=formatted_result)
 
 
 ###################################
