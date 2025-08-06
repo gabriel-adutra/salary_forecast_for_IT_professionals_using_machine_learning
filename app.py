@@ -1,7 +1,7 @@
 import warnings
 import logging
 from flask import Flask, render_template, request
-from utils import load_salary_prediction_models, predict_salary
+from utils import load_salary_prediction_models, make_salary_prediction
 
 # Configure logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -17,18 +17,14 @@ app = Flask(__name__)
 @app.route('/')
 def home():
     """Main route - displays the form"""
-    log.info("HOME endpoint called - no arguments received.")
     result = render_template('home.html')
-    log.info("HOME endpoint returning HTML template.")
+    log.info("HOME endpoint - HTML template returned")
     return result
     
 
 #######
 @app.route('/predict_salary', methods=['POST'])
 def predict_salary():
-
-    log.info("PREDICT_SALARY endpoint called - processing form data.")
-    
     try:
         data = {
             'Country': request.form['Country'],
@@ -36,29 +32,24 @@ def predict_salary():
             'devtype': request.form['devtype'],
             'experience': float(request.form['experience']),
         }
-        log.info(f"PREDICT_SALARY - Input data received: {data}")
     except KeyError as e:
-        log.error(f"PREDICT_SALARY - KeyError in form data: {e}")
-        result = render_template("home.html", prediction_text=f"Invalid input. Error: {e}")
-        log.info("PREDICT_SALARY returning error template")
-        return result
+        log.error(f"PREDICT_SALARY - Missing form field: {e}")
+        return render_template("home.html", prediction_text=f"Invalid input. Error: {e}")
     except ValueError:
-        log.error("PREDICT_SALARY - ValueError: experience must be a valid number")
-        result = render_template("home.html", prediction_text="Experience value must be a valid number.")
-        log.info("PREDICT_SALARY returning error template")
-        return result
+        log.error("PREDICT_SALARY - Invalid experience value")
+        return render_template("home.html", prediction_text="Experience value must be a valid number.")
     
-    if any(value == '' for value in data.values()): # Validates if all fields are filled
-        log.warning("PREDICT_SALARY - Empty fields detected in form data")
-        result = render_template("home.html", prediction_text="Please check if all fields are filled.")
-        log.info("PREDICT_SALARY returning validation error template")
-        return result
+    # Validate all fields are filled
+    if any(value == '' for value in data.values()):
+        log.warning("PREDICT_SALARY - Empty fields detected")
+        return render_template("home.html", prediction_text="Please check if all fields are filled.")
     
-    formatted_result = predict_salary(data, salary_scaler, salary_prediction_model) # Makes prediction and returns formatted result
-    log.info(f"PREDICT_SALARY - Prediction completed: {formatted_result}")
-    result = render_template("home.html", prediction_text=formatted_result)
-    log.info("PREDICT_SALARY returning prediction result template")
-    return result
+    # Make prediction
+    formatted_result = make_salary_prediction(data, salary_scaler, salary_prediction_model)
+    
+    # Log success and return result
+    log.info(f"PREDICT_SALARY - Success: {formatted_result}")
+    return render_template("home.html", prediction_text=formatted_result)
 
 
 ###################################

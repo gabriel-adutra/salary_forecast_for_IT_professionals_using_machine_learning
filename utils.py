@@ -9,7 +9,7 @@ def load_salary_prediction_models():
     return salary_scaler, salary_prediction_model
 
 
-def predict_salary(data, salary_scaler, salary_prediction_model):
+def make_salary_prediction(data, salary_scaler, salary_prediction_model):
     """Executes salary prediction using the loaded model"""
     standardized_data = salary_scaler.transform([list(data.values())]) # Applies the scaler
     output = salary_prediction_model.predict(standardized_data)[0] # Prediction with the model
