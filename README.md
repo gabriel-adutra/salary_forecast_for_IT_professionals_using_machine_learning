@@ -25,6 +25,7 @@ This project implements a machine learning-based salary prediction system for IT
 ```
 salary_forecast_for_IT_professionals_using_machine_learning/
 ├── app.py                          # Main Flask application
+├── utils.py                        # Utility functions for ML operations
 ├── data_science_and_ML_model_creation.ipynb  # Jupyter notebook for model development
 ├── dataset.csv                     # Training dataset
 ├── prediction_model.pkl            # Trained ML model
