@@ -1,10 +1,10 @@
 import warnings
 from flask import Flask, render_template, request
-from utils import load_models, predict_salary
+from utils import load_salary_prediction_models, predict_salary
 
 warnings.filterwarnings('ignore', category=UserWarning, module='sklearn')
 
-scaler, model = load_models()
+salary_scaler, salary_prediction_model = load_salary_prediction_models()
 
 app = Flask(__name__)
 
@@ -34,7 +34,7 @@ def predict_salary():
     if any(value == '' for value in data.values()): # Validates if all fields are filled
         return render_template("home.html", prediction_text="Please check if all fields are filled.")
     
-    formatted_result = predict_salary(data, scaler, model) # Makes prediction and returns formatted result
+    formatted_result = predict_salary(data, salary_scaler, salary_prediction_model) # Makes prediction and returns formatted result
     return render_template("home.html", prediction_text=formatted_result)
 
 
